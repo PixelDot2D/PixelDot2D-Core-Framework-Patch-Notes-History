@@ -1,7 +1,7 @@
 # PixelDot2D Patch Notes History
 Full Patch Note History for the Framework.
 
-[![Unity Asset Store](https://shields.io)](https://assetstore.unity.com/packages/tools/utilities/pixeldot2d-core-framework-370674)
+**Official Marketplace:** Available on the [Unity Asset Store](https://unity.com)
 
 ## Table Of Contents
 *Press Ctrl + F for ease of finding specific notes.*
