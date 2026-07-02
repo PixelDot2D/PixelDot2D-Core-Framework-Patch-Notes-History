@@ -10,7 +10,7 @@ Full Patch Note Histroy for the Framework.
   - [Core Updates](#core-updates)
   - [Combat Sub-Library](#combat-sub-library)
   - [Platformer Sub-Library](#platformer-sub-library)
-  - [Modular Character Sub-Library](#modular-character-sub-library)
+  - [Modular Character Sub-Library](#new-modular-character-sub-library)
 
 ---
 
