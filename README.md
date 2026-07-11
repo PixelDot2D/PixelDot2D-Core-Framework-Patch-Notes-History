@@ -7,13 +7,14 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 - [Patch 2.1.0](#patch-210)
   - [Core Updates](#core-updates-patch-2-1-0)
+  - [Combat Updates](#combat-updates-patch-2-1-0)
 
 
 - [Patch 2.0](#patch-20)
   - [Core Updates](#core-updates-patch-2-0)
-  - [Combat Sub-Library](#combat-sub-library-patch-2-0)
-  - [Platformer Sub-Library](#platformer-sub-library-patch-2-0)
-  - [Modular Character Sub-Library](#modular-character-sub-library-updates-patch-2-0)
+  - [Combat Updates](#combat-updates-patch-2-0)
+  - [Platformer Updates](#platformer-updates-patch-2-0)
+  - [Modular Character Sub-Library](#modular-character-sub-library-patch-2-0)
 
 ---
 ## Patch 2.1.0
@@ -49,6 +50,12 @@ Full Patch Note History for PixelDot2D Core Framework.
 #### Sub-Library Alignment:
 - **Signature Standardization:** Standardized the `Init` method signatures for `RB2DMovement_ModularCharacter` and `RB2DMovement_CombatManager` to require identical core arguments. This strict architectural alignment ensures that upgrading a standard character to a combat-ready state is as simple as swapping a variable, providing a clean path for a library merge if desired.
 
+### Combat Updates <a name="combat-updates-patch-2-1-0"></a>
+
+- **Advanced Projectile Upgrades:** Integrated the `MultiWeaponBlueprint` architecture directly into individual projectile entities to drastically expand their utility.
+- **Multi-Weapon Sequencing:** Any complex weapon behavior capable of being structured inside a `MultiWeaponBlueprint` configuration can now be natively deployed by a projectile directly from the Inspector.
+- **Chain of Command Execution:** Implemented a unified forwarding pipeline that securely passes the root entity source across deeply nested projectile layers. This ensures downstream targeting, tracking filters, and damage calculations always route back cleanly to the original instigator.
+- **Dynamic Layer Relocation:** Shifted valid target and obstacle layer tracking out of static configuration `ScriptableObjects` and directly onto the `IWeaponizable` interface. This fully uncouples targeting constraints from fixed asset data and grants entities absolute authority over their own spatial detection parameters at runtime. Developers can now easily implement dynamic gameplay mechanics such as charm effects, temporary faction swaps, or status-driven accuracy modifiers—such as completely zeroing out obstacle layers (e.g., dropping a Wall layer bitmask to `0`) to seamlessly execute piercing projectile upgrades.
 
 
 ---
@@ -61,7 +68,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Zero-GC Spatial Sensor Module:** Integrated a centralized suite of high-performance spatial sensor utilities supporting Box, Circle, Capsule, and Line casts. These standardized sensors drive environmental awareness across all sub-libraries with zero runtime allocation overhead and integrated Editor Debug Visuals. Following the framework's strict rule of open extensibility, the sensor module is fully architected to support expansion into custom shapes.
 - **Coordinate Virtualization (RB2D Mover):** Refactored the core movement solver to utilize an internal Basis Mapping system. Objects can now define their own local coordinate space (Right/Up vectors) independently of Unity’s Transform component. This allows entities to handle complex, genre-specific movement behaviors, such as 2D side-scrolling sprite flips, via external vector injection without altering physical GameObject orientation or breaking mathematical calculations.
 
-### Combat Sub-Library <a name="combat-sub-library-patch-2-0"></a>
+### Combat Updates <a name="combat-updates-patch-2-0"></a>
 
 - **New Execution Types:** Added Box and Capsule casting for virtual weapon execution.
 - **Optimized Native Physics Execution:** Projectiles have been completely decoupled from traditional Collider2D components. All spatial detection now utilizes direct native C++ calls via `Physics2D.Cast` (supporting Box, Capsule, and Circle shapes). This bypasses the overhead of Unity’s internal physics solver for maximum performance.
@@ -70,13 +77,13 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Stripped Editor Debugging:** All custom virtual collision profiles include live visual debugging. These utilities are strictly wrapped inside `#if UNITY_EDITOR` preprocessor directives, guaranteeing absolute zero CPU or memory overhead in production builds.
 - **Animation Frame-Driven Combat Synchronization:** Integrated the core animation pipeline directly into `RB2DMovement_CombatManager`. The system filters combat execution boundaries based on the active animation frame using an O(1) constant-time lookup structure. Leaving constraint frames empty enables relentless, multi-frame offensive onslaughts, while specifying explicit frame indices grants total authority over frame-perfect combat execution timings.
 
-### Platformer Sub-Library <a name="platformer-sub-library-patch-2-0"></a>
+### Platformer updates <a name="platformer-updates-patch-2-0"></a>
 
 - **Centralized Collision Migration:** Fully migrated actor collision detection to the new Core Physics Module for optimized execution footprints and unified visual debugging.
 - **Global Standardization:** Moved `Enum_PlatformerFacingDirection` to Core and renamed it to `Enum_SideScrollerFacingDirection` for universal use.
 - **Updated Layer Naming Convention:** `Pushable` is now `Interactable`.
 
-### NEW Modular Character Sub-Library <a name="modular-character-sub-library-updates-patch-2-0"></a>
+### NEW Modular Character Sub-Library <a name="modular-character-sub-library-patch-2-0"></a>
 
 Built for entities requiring real-time evolution, mutation, and complete runtime restructuring. The framework enforces atomic control over individual behaviors—enabling developers to seamlessly inject, hot-swap, or strip character logic on the fly across any genre utilizing a standard 2D physics plane, including side-scrollers, 2.5D hybrids, top-down shooters, space simulators, and more.
 
