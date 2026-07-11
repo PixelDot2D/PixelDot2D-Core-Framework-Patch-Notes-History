@@ -72,7 +72,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 ## Critical Architecture Update: Unified Data Pipeline Refactor <a name="critical-architecture-update-unified-data-pipeline-refactor-patch-2-1-0"></a>
 
 ### What Changed?
-We have completely overhauled how telemetry and calculation data flow through our modification hooks, states, and passive systems. Instead of passing loose, individual variables (such as raw floats, separate game references, and isolated bitmasks) across verbose method signatures, all core data is now packaged into a single, high-performance immutable struct parameter block.
+We have completely overhauled how telemetry and calculation data flow through our modification hooks, states, and passive systems. Instead of passing loose, individual variables (such as raw floats, separate game references, and isolated bitmasks) across verbose method signatures, all core data is now packaged into a single, high-performance struct parameter block.
 
 ### Why Was This Done?
 - **Infinite Extensibility without Breaking Changes:** Transitioning to a parameter block struct completely future-proofes your custom APIs. If you or PixelDot2D need to introduce new combat telemetry fields down the line (such as critical hit multipliers, status effects, or elemental school flags), you can simply expand the struct definition. All existing method signatures remain fully intact, completely eliminating the need for cascading code rewrites across your project.
