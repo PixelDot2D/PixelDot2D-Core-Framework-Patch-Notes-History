@@ -8,7 +8,8 @@ Full Patch Note History for PixelDot2D Core Framework.
 > 
 > - **Asmdef Isolation:** Every sub-library within the PixelDot2D ecosystem is isolated into its own explicit Assembly Definition (`.asmdef`). This means framework updates are never "all-or-nothing." You can selectively merge or update specific modules (Combat, Platformer, Modular Character) at your own leisure, or choose to lock a sub-library to an older version indefinitely if it is already tightly coupled to your active project loop.
 > - **The Core Requirement:** While downstream sub-libraries are structurally independent of one another, the **Core module serves as the foundational dependency** for all systems. To ensure framework stability, Core must always be kept updated to match the minimum version requirements of any active sub-library.
-> - **A Note on Custom Monolithic Coupling:** If you have manually removed the internal `.asmdef` files to intentionally break down assembly boundaries and tightly couple a sub-library directly into your own project's monolithic assembly namespace, be advised that package updates cannot automate this. A manual code merge will be required to maintain structural compatibility with the updated Core layer.
+> - **A Note on Cross-Library Merging:** If you have chosen to merge sub-libraries together to deeply couple your gameplay systems (which we highly encourage and structurally support via our unified signatures!), please note that standard package updates cannot automate those custom setups. If you update Core, you can simply perform a quick manual merge to bring your integrated systems up to date, manually cherry-pick the specific patch changes you want, or choose to omit the sub-library updates completely to preserve your custom architecture.
+
 
 ## Table Of Contents
 
