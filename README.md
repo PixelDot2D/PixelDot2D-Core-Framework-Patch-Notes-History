@@ -5,11 +5,51 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 ## Table Of Contents
 
-- [Patch 2.0](#patch-20)
+- [Patch 2.1.0](#patch-210)
   - [Core Updates](#core-updates)
-  - [Combat Sub-Library](#combat-sub-library)
-  - [Platformer Sub-Library](#platformer-sub-library)
-  - [Modular Character Sub-Library](#new-modular-character-sub-library)
+
+
+- [Patch 2.0](#patch-20)
+  - [Core Updates](#core-updates-1)
+  - [Combat Sub-Library](#combat-sub-library-1)
+  - [Platformer Sub-Library](#platformer-sub-library-1)
+  - [Modular Character Sub-Library](#new-modular-character-sub-library-1)
+
+---
+## Patch 2.1.0
+
+### Core Updates
+
+#### Stats Ecosystem:
+- **Safe Stat Overwrites:** Upgraded the internal safe modifier method lookup pipeline to elegantly overwrite existing entries if a matching `EntityID` is already registered. This replaces the previous strict rejection pattern and enables seamless, dynamic refreshing of active modifiers originating from the exact same source.
+- **Buff & Debuff Neutralization:** Implemented standalone Buff and Debuff immunity systems. When active, these states completely isolate a targeted stat entity from external calculation passes, entirely negating positive or negative modifiers according to their respective structural scopes.
+- **Reference-Counted Stat Immunities:** Added full support for stacking additive status immunities across multiple active sources. Modifiers are managed via a non-destructive reference-counting pipeline, ensuring that tracking sources do not introduce destructive side effects to one another (e.g., stripping a temporary potion immunity will safely preserve a permanent equipment immunity).
+
+#### Save and Load Serialization Architecture:
+- **Automated Low-Friction Serialization:** Overhauled the `SaveAndLoadManager` to maximize developer ease-of-use without sacrificing raw disk I/O performance, defensive error handling, or stream stability. Subsystems are now registered using a simple Inspector drag-and-drop workflow. At runtime, the manager automatically validates, captures, and sequences the data stream internally via `Enum_ISaveableAndLoadableKey` sorting rules, completely eliminating manual structural maintenance.
+- **Assembly Isolation:** While the `SaveAndLoadManager` has always resided inside the core framework Assembly Definition (`.asmdef`), it is now fully decoupled via loose enum mappings and interface hooks. This guarantees that Core remains strictly isolated, comfortably saving and loading data across external sub-libraries and custom user-space systems without requiring upstream assembly references.
+
+#### RB2DMovementManager Optimization:
+- **Hybrid Velocity Pipeline:** Upgraded the velocity calculation pipeline from strictly relying on the `ScriptableObject` value to dynamically picking between the configuration asset or the caller’s runtime value.
+- **Absolute Control:** Passing a multiplier of `Vector2.one` allows the `ScriptableObject`'s raw configuration values to drive the final velocity calculations entirely.
+- **Caller Control:** Passing a dynamic `Vector2` runtime value (such as live character stats or randomized multi-axis projectile variance) drives the final output, while setting the corresponding `ScriptableObject`'s base axis speeds to `1.0f` acts as a clean, unscaled multiplier baseline.
+- **Axis Locking:** Setting any specific axis speed to `0.0f` within either the configuration asset or the incoming multiplier vector completely isolates, locks, or ignores movement on that plane via direct zero-multiplication.
+
+#### Low-Overhead Native Collision Matrix:
+- **Custom Collision System:** Added a high-performance collision matrix to completely bypass Unity's native Box2D performance cost and lifecycle inconsistencies.
+- **Traditional Trigger Lifecycles:** Maintains full `OnTriggerEnter`, `OnTriggerStay`, and `OnTriggerExit` lifecycle simulations, driven entirely by manual, predictable update pumps inside your fixed layout loop.
+- **Batched Data Payloads:** Combines all frame intersections into a single event call, separating results into dedicated collections for valid targets and obstacles simultaneously.
+- **Total Execution Control:** Grants developers absolute control over sorting priority, allowing you to check obstacle lines first for early deactivation or focus on valid target logic instantly.
+- **Dual Evaluation Modes:** Added support for two distinct collision check resolutions selectable directly via the Inspector:
+  - `PerGameObject`: Automatically filters out duplicate hits originating from redundant sub-colliders.
+  - `PerCollider`: Tracks individual sub-collider components independently, treating each instance as a unique spatial interaction for precise, locational hitbox mapping.
+- **Dynamic Physics Casting:** Updated Box, Capsule, and Line shapes to optionally factor in the origin's direct rotation or remain globally isolated from local orientation changes.
+- **Custom Pivot Offsets:** Added configuration options to allow casting shapes to explicitly use the origin transform as a custom rotational pivot point.
+
+#### Sub-Library Alignment:
+- **Signature Standardization:** Standardized the `Init` method signatures for `RB2DMovement_ModularCharacter` and `RB2DMovement_CombatManager` to require identical core arguments. This strict architectural alignment ensures that upgrading a standard character to a combat-ready state is as simple as swapping a variable, providing a clean path for a library merge if desired.
+
+
 
 ---
 
