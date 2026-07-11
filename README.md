@@ -9,6 +9,7 @@ Full Patch Note History for PixelDot2D Core Framework.
   - [Core Updates](#core-updates-patch-2-1-0)
   - [Combat Updates](#combat-updates-patch-2-1-0)
   - [Modular Character Updates](#modular-character-updates-patch-2-1-0)
+  - [Modular Character Updates](#critical-architcture-update-patch-2-1-0)
 
 
 - [Patch 2.0](#patch-20)
@@ -66,6 +67,24 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **New Passive Execution – Stat Immunity:** Introduced a versatile execution type fully integrated with all structural passive Gates. This new module grants passive Cog sequences direct authority over an entity's Stat immunity layer. Developers can now orchestrate runtime execution passes that dynamically trigger absolute isolation from buffs, debuffs, or both simultaneously, driven entirely by `ScriptableObject` data configurations.
 - **New Passive Execution – Debuff Immunities:** Introduced a specialized execution type integrated with all structural passive Gates. This Cog enables passive sequences to instantly grant comprehensive debuff immunities based on specific mechanical or damage-school flags mapped in the asset data.
 - **New Passive Execution – Change State:** Added a state-transition Cog that triggers a runtime state change upon satisfying a defined Gate Cog while securely caching the pre-existing state context. Upon reaching the passive’s designated Exit Cog, the execution layer evaluates the current state; if an external source has since overridden the state category or assumed state ownership, the reversion gracefully aborts. This allows temporary state-altering passives (such as gliding, hovering, or dashing) to safely self-clean without disrupting newer, high-priority state overrides.
+
+
+## Critical Architecture Update: Unified Data Pipeline Refactor <a name="critical-architecture-update-patch-2-1-0"></a>
+
+### What Changed?
+We have completely overhauled how telemetry and calculation data flow through our modification hooks, states, and passive systems. Instead of passing loose, individual variables (such as raw floats, separate game references, and isolated bitmasks) across verbose method signatures, all core data is now packaged into a single, high-performance immutable struct parameter block.
+
+### Why Was This Done?
+- **Infinite Extensibility without Breaking Changes:** Transitioning to a parameter block struct completely future-proofes your custom APIs. If you or PixelDot2D need to introduce new combat telemetry fields down the line (such as critical hit multipliers, status effects, or elemental school flags), you can simply expand the struct definition. All existing method signatures remain fully intact, completely eliminating the need for cascading code rewrites across your project.
+- **The Unified Cross-Library Bridge:** This structural shift aligns perfectly with the underlying design of our Combat Sub-Library. If you choose to merge the Modular Character and Combat sub-libraries together, they now natively speak the same language and share the exact same structural data blueprint. This turns a historically complex multi-system integration into a straightforward variable swap.
+
+### Crucial Upgrade Instructions
+> [!WARNING]
+> Because this refactor modifies the core signatures across our passives, gates, and states, updating your project package will cause localized compilation errors if you have heavily overridden or customized these files. 
+
+- **If you have NOT added custom code:** Simply allow the package update to overwrite your local files completely. The project will compile cleanly out of the box with the new struct implementations.
+- **If you HAVE written custom logic:** A manual script merge will be required. You will simply need to update your custom hook method overrides to accept the new struct parameter and read your logic values directly from its fields.
+- **Ready to Merge Libraries:** If you decide to merge the two libraries, we have included a meticulously detailed, heavily commented integration blueprint directly within the codebase. To view the step-by-step instructions on how to seamlessly bridge these two packages together, inspect `DamageData.cs` or `DamageReport.cs` located within your Combat structs directory.
 
 
 ---
