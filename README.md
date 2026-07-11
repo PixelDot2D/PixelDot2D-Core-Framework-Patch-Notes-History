@@ -9,7 +9,7 @@ Full Patch Note History for PixelDot2D Core Framework.
   - [Core Updates](#core-updates-patch-2-1-0)
   - [Combat Updates](#combat-updates-patch-2-1-0)
   - [Modular Character Updates](#modular-character-updates-patch-2-1-0)
-  - [Modular Character Updates](#critical-architcture-update-patch-2-1-0)
+  - [Critical Refactor Notice](#critical-architecture-update-unified-data-pipeline-refactor-patch-2-1-0)
 
 
 - [Patch 2.0](#patch-20)
@@ -69,7 +69,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **New Passive Execution – Change State:** Added a state-transition Cog that triggers a runtime state change upon satisfying a defined Gate Cog while securely caching the pre-existing state context. Upon reaching the passive’s designated Exit Cog, the execution layer evaluates the current state; if an external source has since overridden the state category or assumed state ownership, the reversion gracefully aborts. This allows temporary state-altering passives (such as gliding, hovering, or dashing) to safely self-clean without disrupting newer, high-priority state overrides.
 
 
-## Critical Architecture Update: Unified Data Pipeline Refactor <a name="critical-architecture-update-patch-2-1-0"></a>
+## Critical Architecture Update: Unified Data Pipeline Refactor <a name="critical-architecture-update-unified-data-pipeline-refactor-patch-2-1-0"></a>
 
 ### What Changed?
 We have completely overhauled how telemetry and calculation data flow through our modification hooks, states, and passive systems. Instead of passing loose, individual variables (such as raw floats, separate game references, and isolated bitmasks) across verbose method signatures, all core data is now packaged into a single, high-performance immutable struct parameter block.
