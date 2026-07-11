@@ -18,7 +18,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 ---
 ## Patch 2.1.0
 
-### Core Updates <a name="core-updates-patch-2-0"></a>
+### Core Updates <a name="core-updates-patch-2-1-0"></a>
 
 #### Stats Ecosystem:
 - **Safe Stat Overwrites:** Upgraded the internal safe modifier method lookup pipeline to elegantly overwrite existing entries if a matching `EntityID` is already registered. This replaces the previous strict rejection pattern and enables seamless, dynamic refreshing of active modifiers originating from the exact same source.
