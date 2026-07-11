@@ -12,13 +12,13 @@ Full Patch Note History for PixelDot2D Core Framework.
 - [Patch 2.0](#patch-20)
   - [Core Updates](#core-updates-patch-2-0)
   - [Combat Sub-Library](#combat-sub-library-patch-2-0)
-  - [Platformer Sub-Library](#platformer-updates-patch-2-0)
-  - [Modular Character Sub-Library](#modularCharacter-updates-patch-2-0)
+  - [Platformer Sub-Library](#platformer-sub-library-patch-2-0)
+  - [Modular Character Sub-Library](#modular-character-sub-library-updates-patch-2-0)
 
 ---
 ## Patch 2.1.0
 
-### Core Updates
+### Core Updates <a name="core-updates-patch-2-0"></a>
 
 #### Stats Ecosystem:
 - **Safe Stat Overwrites:** Upgraded the internal safe modifier method lookup pipeline to elegantly overwrite existing entries if a matching `EntityID` is already registered. This replaces the previous strict rejection pattern and enables seamless, dynamic refreshing of active modifiers originating from the exact same source.
@@ -70,13 +70,13 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Stripped Editor Debugging:** All custom virtual collision profiles include live visual debugging. These utilities are strictly wrapped inside `#if UNITY_EDITOR` preprocessor directives, guaranteeing absolute zero CPU or memory overhead in production builds.
 - **Animation Frame-Driven Combat Synchronization:** Integrated the core animation pipeline directly into `RB2DMovement_CombatManager`. The system filters combat execution boundaries based on the active animation frame using an O(1) constant-time lookup structure. Leaving constraint frames empty enables relentless, multi-frame offensive onslaughts, while specifying explicit frame indices grants total authority over frame-perfect combat execution timings.
 
-### Platformer Sub-Library <a name="platformer-updates-patch-2-0"></a>
+### Platformer Sub-Library <a name="platformer-sub-library-patch-2-0"></a>
 
 - **Centralized Collision Migration:** Fully migrated actor collision detection to the new Core Physics Module for optimized execution footprints and unified visual debugging.
 - **Global Standardization:** Moved `Enum_PlatformerFacingDirection` to Core and renamed it to `Enum_SideScrollerFacingDirection` for universal use.
 - **Updated Layer Naming Convention:** `Pushable` is now `Interactable`.
 
-### NEW Modular Character Sub-Library <a name="modularCharacter-updates-patch-2-0"></a>
+### NEW Modular Character Sub-Library <a name="modular-character-sub-library-updates-patch-2-0"></a>
 
 Built for entities requiring real-time evolution, mutation, and complete runtime restructuring. The framework enforces atomic control over individual behaviors—enabling developers to seamlessly inject, hot-swap, or strip character logic on the fly across any genre utilizing a standard 2D physics plane, including side-scrollers, 2.5D hybrids, top-down shooters, space simulators, and more.
 
