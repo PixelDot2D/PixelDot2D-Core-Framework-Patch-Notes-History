@@ -8,6 +8,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 - [Patch 2.1.0](#patch-210)
   - [Core Updates](#core-updates-patch-2-1-0)
   - [Combat Updates](#combat-updates-patch-2-1-0)
+  - [Modular Character Updates](#modular-character-updates-patch-2-1-0)
 
 
 - [Patch 2.0](#patch-20)
@@ -56,6 +57,15 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Multi-Weapon Sequencing:** Any complex weapon behavior capable of being structured inside a `MultiWeaponBlueprint` configuration can now be natively deployed by a projectile directly from the Inspector.
 - **Chain of Command Execution:** Implemented a unified forwarding pipeline that securely passes the root entity source across deeply nested projectile layers. This ensures downstream targeting, tracking filters, and damage calculations always route back cleanly to the original instigator.
 - **Dynamic Layer Relocation:** Shifted valid target and obstacle layer tracking out of static configuration `ScriptableObjects` and directly onto the `IWeaponizable` interface. This fully uncouples targeting constraints from fixed asset data and grants entities absolute authority over their own spatial detection parameters at runtime. Developers can now easily implement dynamic gameplay mechanics such as charm effects, temporary faction swaps, or status-driven accuracy modifiers—such as completely zeroing out obstacle layers (e.g., dropping a Wall layer bitmask to `0`) to seamlessly execute piercing projectile upgrades.
+
+### Modular Character Updates <a name="modular-character-updates-patch-2-1-0"></a>
+
+- **Reference-Counted Status Immunities:** Upgraded the passive status execution layer to natively support non-destructive immunity tracking via unique `EntityId` mapping. Active status protections originating from overlapping, multi-layered sources (such as an item, an active passive, and a temporary consumable potion simultaneously) now register independently within a pre-warmed tracking dictionary. When a temporary effect expires or is cleanly stripped, the system triggers an optimized baseline cache sweep, safely preserving remaining active gameplay immunities without allowing temporary duration ends to leave behind data leaks or accidentally clear permanent equipment or baseline protection.
+- **State Factory Validation Lifecycle:** Updated the `ModularCharacterController` pipeline to allow state instances to register and preserve their originating `ScriptableObject` factory references. This introduces a secure, deterministic verification mechanism that allows external systems to safely cache active slots, hot-swap behaviors, and accurately validate ownership bounds before reverting modifications. This structural anchor provides immediate native support for complex runtime events like temporary passives and equipment configuration swaps.
+- **Dynamic World-Space Inversion:** Implemented an array of relative orientation methods to completely uncouple entity translational physics from Unity's global static coordinates. By tracking and scaling localized axis signs through basis vectors, developers can cleanly trigger advanced spatial modifications—such as completely reversing a player's directional control layout or flipping relative environmental gravity parameters—via simple runtime vector adjustments.
+- **New Passive Execution – Stat Immunity:** Introduced a versatile execution type fully integrated with all structural passive Gates. This new module grants passive Cog sequences direct authority over an entity's Stat immunity layer. Developers can now orchestrate runtime execution passes that dynamically trigger absolute isolation from buffs, debuffs, or both simultaneously, driven entirely by `ScriptableObject` data configurations.
+- **New Passive Execution – Debuff Immunities:** Introduced a specialized execution type integrated with all structural passive Gates. This Cog enables passive sequences to instantly grant comprehensive debuff immunities based on specific mechanical or damage-school flags mapped in the asset data.
+- **New Passive Execution – Change State:** Added a state-transition Cog that triggers a runtime state change upon satisfying a defined Gate Cog while securely caching the pre-existing state context. Upon reaching the passive’s designated Exit Cog, the execution layer evaluates the current state; if an external source has since overridden the state category or assumed state ownership, the reversion gracefully aborts. This allows temporary state-altering passives (such as gliding, hovering, or dashing) to safely self-clean without disrupting newer, high-priority state overrides.
 
 
 ---
