@@ -6,7 +6,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 ## Table Of Contents
 
 - [Patch 2.1.0](#patch-210)
-  - [Core Updates](#core-updates)
+  - [Core Updates](#core-updates-patch-2-1-0)
 
 
 - [Patch 2.0](#patch-20)
