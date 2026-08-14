@@ -44,6 +44,11 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Enum Metrics (Enum.GetLength):** Implemented a generic-static caching layer (`EnumLengthCache<T>`) for enum metadata. This isolates the expensive reflection overhead (`Enum.GetValues`) to a one-time runtime cost per type, rendering all subsequent length queries effectively free and allocation-free.
 - **Readable Enum Flags (ToValidFlagsString):** Overhauled flag string parsing by permanently caching enum metadata inside a generic-static architecture (`EnumFlagCache<T>`). By utilizing low-level memory reinterpretation, a non-allocating internal static buffer, and `ReadOnlySpan` loops with `ref readonly` managed pointers, execution completely bypasses reflection and structural stack copying. This drastically slashes execution overhead, reducing dynamic heap allocation down to exactly one object—the final returned string itself.
 - **Zero-Allocation Enum String Casts (AsString):** Introduced a highly efficient, garbage-free alternative to `object.ToString()`. This extension leverages a generic-static lookup architecture (`EnumNameCache<T>`) and register-speed memory reinterpretation via bit-reinterpretation to return string definitions with an immediate O(1) query speed. It generates structural string allocations exactly once per unique enum type during boot-up, rendering all future runtime fetches completely allocation-free. All subsystems across the entire framework have been thoroughly refactored to utilize this method over legacy string operations.
+- **Vector2 Distance Evaluation Architecture:** Introduced a high-performance suite of distance-checking extension methods (`IsWithinDistance`, `IsWithinDistanceUnSquared`, `CompareDistance`, and `CompareDistanceUnSquared`) to standardize range verification while completely bypassing the expensive square-root math operations of native `Vector2.Distance`. 
+    - **Pre-Squared Pipelines:** Passing a pre-squared threshold collapses evaluation down to a lightning-fast, single-cycle CPU relational comparison over raw floating-point register addresses.
+    - **Un-Squared Convenience Overloads:** Passing a standard, un-squared float automatically handles the localized multiplication internally. This delivers a highly intuitive API that still executes roughly twice as fast as Unity's native `Vector2.Distance` by avoiding square root calculation entirely.
+    - **Dynamic Evaluation Blocks:** Features flexible comparison utilizing `Enum_DistanceComparisonType`. This allows developers to seamlessly drive dynamic condition evaluations (such as greater than, less than, or equality approximations via `Mathf.Approximately`) through a single unified entry point.
+
 - **Heap-Free Digit Parsing (TryParseIntDigits / TryParseFloatDigits):** Introduced two new high-performance extension methods to extract and parse numeric sequences directly out of messy layout strings. By leveraging a localized 512-byte buffer (`stackalloc char`), execution bypasses the managed heap completely to deliver zero-garbage runtime parsing at native hardware speeds. Both methods automatically strip non-numeric characters, utilize short-circuit lookback gates to support signed negative inputs safely, and handle leading minus decimal variants (such as `-.23`). In compliance with strict validation standards, any structural failure paths—including null/empty strings, buffer size overflows, absent digits, or overflow parse errors—will safely return `int.MinValue` or `float.MinValue` respectively.
 - **Allocation-Free Digit Validation (HasDigits):** Provided a garbage-free verification method to determine if a string contains numeric text. This execution bypasses the hidden iterator heap allocations and boxing overhead caused by standard C# LINQ one-liners (`s.Any`).
 - **AnimationPlayer2D:** Added `m_OnFrameChange` event support. Developers can now subscribe to a single event that fires exactly once per sequence or sprite frame change. This eliminates the need to manually poll `GetCurrentFrame()` inside Update loops for one-shot logic (such as triggering an action when a specific frame is reached). Developers still retain full flexibility to use `GetCurrentFrame()` for continuous, frame-duration checks (such as keeping a weapon hitbox active for the entire duration of a frame).
@@ -63,16 +68,19 @@ Use code with caution.
 #### Stats Ecosystem:
 - **Safe Stat Overwrites:** Upgraded the internal safe modifier method lookup pipeline to elegantly overwrite existing entries if a matching `EntityID` is already registered. This replaces the previous strict rejection pattern and enables seamless, dynamic refreshing of active modifiers originating from the exact same source.
 - **Buff & Debuff Neutralization:** Implemented standalone Buff and Debuff immunity systems. When active, these states completely isolate a targeted stat entity from external calculation passes, entirely negating positive or negative modifiers according to their respective structural scopes.
+  
 - **Reference-Counted Stat Immunities:** Added full support for stacking additive status immunities across multiple active sources. Modifiers are managed via a non-destructive reference-counting pipeline, ensuring that tracking sources do not introduce destructive side effects to one another (Such as, stripping a temporary potion immunity will safely preserve a permanent equipment immunity).
 
 #### Save and Load Serialization Architecture:
 - **Automated Low-Friction Serialization:** Overhauled the `SaveAndLoadManager` to maximize developer ease-of-use without sacrificing raw disk I/O performance, defensive error handling, or stream stability. Subsystems are now registered using a simple Inspector drag-and-drop workflow. At runtime, the manager automatically validates, captures, and sequences the data stream internally via `Enum_ISaveableAndLoadableKey` sorting rules, completely eliminating manual structural maintenance.
+  
 - **Assembly Isolation:** While the `SaveAndLoadManager` has always resided inside the core framework Assembly Definition (`.asmdef`), it is now fully decoupled via loose enum mappings and interface hooks. This guarantees that Core remains strictly isolated, comfortably saving and loading data across external sub-libraries and custom user-space systems without requiring upstream assembly references.
 
 #### RB2DMovementManager Optimization:
 - **Hybrid Velocity Pipeline:** Upgraded the velocity calculation pipeline from strictly relying on the `ScriptableObject` value to dynamically picking between the configuration asset or the caller’s runtime value.
 - **Absolute Control:** Passing a multiplier of `Vector2.one` allows the `ScriptableObject`'s raw configuration values to drive the final velocity calculations entirely.
 - **Caller Control:** Passing a dynamic `Vector2` runtime value (such as live character stats or randomized multi-axis projectile variance) drives the final output, while setting the corresponding `ScriptableObject`'s base axis speeds to `1.0f` acts as a clean, unscaled multiplier baseline.
+  
 - **Axis Locking:** Setting any specific axis speed to `0.0f` within either the configuration asset or the incoming multiplier vector completely isolates, locks, or ignores movement on that plane via direct zero-multiplication.
 
 #### Low-Overhead Native Collision Matrix:
@@ -84,6 +92,7 @@ Use code with caution.
   - `PerGameObject`: Automatically filters out duplicate hits originating from redundant sub-colliders.
   - `PerCollider`: Tracks individual sub-collider components independently, treating each instance as a unique spatial interaction for precise, locational hitbox mapping.
 - **Dynamic Physics Casting:** Updated Box, Capsule, and Line shapes to optionally factor in the origin's direct rotation or remain globally isolated from local orientation changes.
+  
 - **Custom Pivot Offsets:** Added configuration options to allow casting shapes to explicitly use the origin transform as a custom rotational pivot point.
 
 #### Sub-Library Alignment:
@@ -94,6 +103,7 @@ Use code with caution.
 - **Advanced Projectile Upgrades:** Integrated the `MultiWeaponBlueprint` architecture directly into individual projectile entities to drastically expand their utility.
 - **Multi-Weapon Sequencing:** Any complex weapon behavior capable of being structured inside a `MultiWeaponBlueprint` configuration can now be natively deployed by a projectile directly from the Inspector.
 - **Chain of Command Execution:** Implemented a unified forwarding pipeline that securely passes the root entity source across deeply nested projectile layers. This ensures downstream targeting, tracking filters, and damage calculations always route back cleanly to the original instigator.
+  
 - **Dynamic Layer Relocation:** Shifted valid target and obstacle layer tracking out of static configuration `ScriptableObjects` and directly onto the `IWeaponizable` interface. This fully uncouples targeting constraints from fixed asset data and grants entities absolute authority over their own spatial detection parameters at runtime. Developers can now easily implement dynamic gameplay mechanics such as charm effects, temporary faction swaps, or status-driven accuracy modifiers—such as completely zeroing out obstacle layers (Such as, dropping a Wall layer bitmask to `0`) to seamlessly execute piercing projectile upgrades.
 
 ### Modular Character Updates <a name="modular-character-updates-patch-2-1-0"></a>
@@ -103,6 +113,7 @@ Use code with caution.
 - **Dynamic World-Space Inversion:** Implemented an array of relative orientation methods to completely uncouple entity translational physics from Unity's global static coordinates. By tracking and scaling localized axis signs through basis vectors, developers can cleanly trigger advanced spatial modifications—such as completely reversing a player's directional control layout or flipping relative environmental gravity parameters—via simple runtime vector adjustments.
 - **New Passive Execution – Stat Immunity:** Introduced a versatile execution type fully integrated with all structural passive Gates. This new module grants passive Cog sequences direct authority over an entity's Stat immunity layer. Developers can now orchestrate runtime execution passes that dynamically trigger absolute isolation from buffs, debuffs, or both simultaneously, driven entirely by `ScriptableObject` data configurations.
 - **New Passive Execution – Debuff Immunities:** Introduced a specialized execution type integrated with all structural passive Gates. This Cog enables passive sequences to instantly grant comprehensive debuff immunities based on specific mechanical or damage-school flags mapped in the asset data.
+  
 - **New Passive Execution – Change State:** Added a state-transition Cog that triggers a runtime state change upon satisfying a defined Gate Cog while securely caching the pre-existing state context. Upon reaching the passive’s designated Exit Cog, the execution layer evaluates the current state; if an external source has since overridden the state category or assumed state ownership, the reversion gracefully aborts. This allows temporary state-altering passives (such as gliding, hovering, or dashing) to safely self-clean without disrupting newer, high-priority state overrides.
 
 
@@ -113,6 +124,7 @@ We have completely overhauled how telemetry and calculation data flow through ou
 
 ### Why Was This Done?
 - **Infinite Extensibility without Breaking Changes:** Transitioning to a parameter block struct completely future-proofes your custom APIs. If you or PixelDot2D need to introduce new combat telemetry fields down the line (such as critical hit multipliers, status effects, or elemental school flags), you can simply expand the struct definition. All existing method signatures remain fully intact, completely eliminating the need for cascading code rewrites across your project.
+  
 - **The Unified Cross-Library Bridge:** This structural shift aligns perfectly with the underlying design of our Combat Sub-Library. If you choose to merge the Modular Character and Combat sub-libraries together, they now natively speak the same language and share the exact same structural data blueprint. This turns a historically complex multi-system integration into a straightforward variable swap.
 
 ### Crucial Upgrade Instructions
@@ -121,6 +133,7 @@ We have completely overhauled how telemetry and calculation data flow through ou
 
 - **If you have NOT added custom code:** Simply allow the package update to overwrite your local files completely. The project will compile cleanly out of the box with the new struct implementations.
 - **If you HAVE written custom logic:** A manual script merge will be required. You will simply need to update your custom hook method overrides to accept the new struct parameter and read your logic values directly from its fields.
+  
 - **Ready to Merge Libraries:** If you decide to merge the two libraries, we have included a meticulously detailed, heavily commented integration blueprint directly within the codebase. To view the step-by-step instructions on how to seamlessly bridge these two packages together, inspect `DamageData.cs` or `DamageReport.cs` located within your Combat structs directory.
 
 
@@ -132,6 +145,7 @@ We have completely overhauled how telemetry and calculation data flow through ou
 
 - **Thread Safety:** Added thread-safe handling for Unity Objects during Preload, Pre-save, Save Complete, and Load Complete cycles.
 - **Zero-GC Spatial Sensor Module:** Integrated a centralized suite of high-performance spatial sensor utilities supporting Box, Circle, Capsule, and Line casts. These standardized sensors drive environmental awareness across all sub-libraries with zero runtime allocation overhead and integrated Editor Debug Visuals. Following the framework's strict rule of open extensibility, the sensor module is fully architected to support expansion into custom shapes.
+  
 - **Coordinate Virtualization (RB2D Mover):** Refactored the core movement solver to utilize an internal Basis Mapping system. Objects can now define their own local coordinate space (Right/Up vectors) independently of Unity’s Transform component. This allows entities to handle complex, genre-specific movement behaviors, such as 2D side-scrolling sprite flips, via external vector injection without altering physical GameObject orientation or breaking mathematical calculations.
 
 ### Combat Updates <a name="combat-updates-patch-2-0"></a>
@@ -141,12 +155,14 @@ We have completely overhauled how telemetry and calculation data flow through ou
 - **Virtual Collision Lifecycle & Overlap Tracking:** Implemented a zero-allocation, math-driven physics solver that perfectly emulates Unity’s `OnEnter`, `OnStay`, and `OnExit` hooks without physical colliders. By utilizing an internal persistent buffer, the system enforces Overlap Memoization to prevent multi-hit frame spikes while natively supporting Dynamic Re-entry Detection if a target leaves and re-enters the virtual volume.
 - **Deterministic Feedback Filtering:** Implemented a specialized `OnObstacleHitOnly` event hook, allowing developers to cleanly isolate environmental particle feedback (such as wall sparks) from high-priority combat visual effects (such as blood splatters).
 - **Stripped Editor Debugging:** All custom virtual collision profiles include live visual debugging. These utilities are strictly wrapped inside `#if UNITY_EDITOR` preprocessor directives, guaranteeing absolute zero CPU or memory overhead in production builds.
+  
 - **Animation Frame-Driven Combat Synchronization:** Integrated the core animation pipeline directly into `RB2DMovement_CombatManager`. The system filters combat execution boundaries based on the active animation frame using an O(1) constant-time lookup structure. Leaving constraint frames empty enables relentless, multi-frame offensive onslaughts, while specifying explicit frame indices grants total authority over frame-perfect combat execution timings.
 
 ### Platformer updates <a name="platformer-updates-patch-2-0"></a>
 
 - **Centralized Collision Migration:** Fully migrated actor collision detection to the new Core Physics Module for optimized execution footprints and unified visual debugging.
 - **Global Standardization:** Moved `Enum_PlatformerFacingDirection` to Core and renamed it to `Enum_SideScrollerFacingDirection` for universal use.
+  
 - **Updated Layer Naming Convention:** `Pushable` is now `Interactable`.
 
 ### NEW Modular Character Sub-Library <a name="modular-character-sub-library-patch-2-0"></a>
@@ -164,6 +180,7 @@ To ensure absolute stability during complex, multi-state reconfigurations, all t
 - **Interface-Driven Pipeline:** Requires only a single, thin interface (`IModularCharacter`), completely eliminating forced inheritance.
 - **Virtual Lazy State Pooling:** Internal memory management that only keeps required states in memory, recycling instances to preserve cache locality.
 - **Modular "Lego-Style" Passives:** Deconstruct passives into interchangeable `ScriptableObject` cogs to build complex gameplay synergies with zero code changes.
+  
 - **Infinite Reusability:** One universal controller to drive players, enemies, AI companions, or any 2D entity.
 
 ---
