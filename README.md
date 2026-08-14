@@ -13,6 +13,11 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 ## Table Of Contents
 
+- [Patch 2.2.0](#patch-220)
+    - [Core Updates](#core-updates-patch-2-2-0)
+    - [Combat Updates](#combat-updates-patch-2-2-0)
+
+
 - [Patch 2.1.0](#patch-210)
   - [Core Updates](#core-updates-patch-2-1-0)
   - [Combat Updates](#combat-updates-patch-2-1-0)
@@ -25,6 +30,30 @@ Full Patch Note History for PixelDot2D Core Framework.
   - [Combat Updates](#combat-updates-patch-2-0)
   - [Platformer Updates](#platformer-updates-patch-2-0)
   - [Modular Character Sub-Library](#modular-character-sub-library-patch-2-0)
+
+---
+## Patch 2.2.0
+
+### Core Updates <a name="core-updates-patch-2-2-0"></a>
+
+> **[NOTE]**
+> All core extension methods' performance updates preserve identical public method signatures. Team members can securely update their local repositories without risking merge conflicts or code breakage, as all optimizations were executed strictly under the hood.
+
+- **Inlining Optimization:** Applied `[MethodImpl(MethodImplOptions.AggressiveInlining)]` to eligible extension methods to minimize call-stack overhead and maximize execution speed.
+- **Int to Enum Conversion (IntExtension):** Rewrote integer-to-enum casting using low-level bit-reinterpretation to completely bypass expensive boxing/unboxing operations, resulting in a zero-allocation, register-speed conversion.
+- **Enum Metrics (Enum.GetLength):** Implemented a generic-static caching layer (`EnumLengthCache<T>`) for enum metadata. This isolates the expensive reflection overhead (`Enum.GetValues`) to a one-time runtime cost per type, rendering all subsequent length queries effectively free and allocation-free.
+- **Human-Readable Enum Flags (ToValidFlagsString):** Overhauled flag string parsing by permanently caching enum metadata inside a generic-static architecture (`EnumFlagCache<T>`). By utilizing low-level memory reinterpretation, a non-allocating internal static buffer, and `ReadOnlySpan` loops with `ref readonly` managed pointers, execution completely bypasses reflection and structural stack copying. This drastically slashes execution overhead, reducing dynamic heap allocation down to exactly one object—the final returned string itself.
+- **Zero-Allocation Enum String Casts (AsString):** Introduced a highly efficient, garbage-free alternative to `object.ToString()`. This extension leverages a generic-static lookup architecture (`EnumNameCache<T>`) and register-speed memory reinterpretation via bit-reinterpretation to return string definitions with an immediate O(1) query speed. It generates structural string allocations exactly once per unique enum type during boot-up, rendering all future runtime fetches completely allocation-free. All subsystems across the entire framework have been thoroughly refactored to utilize this method over legacy string operations.
+- **Heap-Free Digit Parsing (TryParseIntDigits / TryParseFloatDigits):** Introduced two new high-performance extension methods to extract and parse numeric sequences directly out of messy layout strings. By leveraging a localized 512-byte buffer (`stackalloc char`), execution bypasses the managed heap completely to deliver zero-garbage runtime parsing at native hardware speeds. Both methods automatically strip non-numeric characters, utilize short-circuit lookback gates to support signed negative inputs safely, and handle leading minus decimal variants (such as `-.23`). In compliance with strict validation standards, any structural failure paths—including null/empty strings, buffer size overflows, absent digits, or overflow parse errors—will safely return `int.MinValue` or `float.MinValue` respectively.
+- **Allocation-Free Digit Validation (HasDigits):** Provided a garbage-free verification method to determine if a string contains numeric text. This execution bypasses the hidden iterator heap allocations and boxing overhead caused by standard C# LINQ one-liners (`s.Any`).
+- **AnimationPlayer2D:** Added `m_OnFrameChange` event support. Developers can now subscribe to a single event that fires exactly once per sequence or sprite frame change. This eliminates the need to manually poll `GetCurrentFrame()` inside Update loops for one-shot logic (such as triggering an action when a specific frame is reached). Developers still retain full flexibility to use `GetCurrentFrame()` for continuous, frame-duration checks (such as keeping a weapon hitbox active for the entire duration of a frame).
+- **IVirtualTransform:** Introduced a new interface architecture to serve as a decoupled bridge between native Unity components and core framework systems (including Custom Collision, Physics Cast, and Combat modules). By abstracting spatial tracking away from the native `UnityEngine.GameObject` container, this contract allows total freedom over the underlying source of your 2D coordinates and orientation angles. Systems can seamlessly ingest data from raw physics vectors, mathematical calculations, or localized targets without forcing game object overhead on developers, while still retaining the exact simplicity of standard component tracking when standard GameObject integration is desired.
+- **Inversion-Driven Line of Sight System:** Introduced a new, high-performance line-of-sight architecture that completely centralizes spatial visibility checking and permanently eliminates manual physics boilerplate across your projects. Implemented via a polymorphic factory pattern, the architecture decouples execution from native game loops using a standardized 3-tier triad (Data, ScriptableObject, and State components), allowing developers to add or swap custom visibility shapes seamlessly without modifying host code. To maximize runtime performance, the execution pipeline utilizes an inverted logic model: rather than querying dynamic target entities, it isolates evaluation strictly to environmental obstacle masks and maps queries to a fixed, single-slot results buffer. This allows the underlying physics engine to instantly short-circuit and terminate processing calculations the exact moment a single piece of cover geometry is encountered. The entire system is engineered for zero-garbage runtime execution, caches squared distance bounds at initialization to completely bypass expensive distance square-root operations, and features a comprehensively formatted header document detailing step-by-step implementation, usage, the underlying architectural reasoning, and extension guidelines.
+
+### Combat Updates <a name="combat-updates-patch-2-2-0"></a>
+
+- **Modular Trigger Decoupling (WeaponizedModule):** Decoupled weapon progression simulation from explicit execution calls by allowing `shouldTryExecute` to be passed as `false` during `FixedUpdate`. Developers can now manually poll and trigger `TryExecute()` on demand. This enables complex, state-driven combat systems (such as Character State Machines) to easily request a weapon activation from their own logic layers, keeping modules separate and preventing duplicate fixed update triggers while ensuring background weapon logic ticks uninterrupted.
+Use code with caution.
 
 ---
 ## Patch 2.1.0
