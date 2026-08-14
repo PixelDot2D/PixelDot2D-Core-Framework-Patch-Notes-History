@@ -38,6 +38,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 > **CRITICAL ENGINE REQUIREMENT UPDATE**
 > 
 > The minimum engine version requirement has been upgraded from **Unity 6.3 to Unity 6.5**. This change bridges our framework dependencies with Unity's internal underlying architectural reworks. With Unity 6.5 exposing hidden low-level system compilation rules to prepare the ecosystem for production-verified, near-instant "Fast Enter Play Mode" reloads as the default behavior, this update future-proofes our core caching layers and memory reinterpretation pipelines to guarantee maximum stability and seamless sub-second domain reloading speeds.
+> This major engine migration directly unlocks the ability to overhaul core architectural subsystems, leveraging native bit-reinterpretation and direct memory pointers to achieve maximum hardware-level execution. By treating enums as raw integers at the pointer layer without standard casting, our generic methods completely bypass all reflection, dynamic heap allocations, and boxing/unboxing overhead.
 
 ### Core Updates <a name="core-updates-patch-2-2-0"></a>
 
