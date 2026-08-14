@@ -34,9 +34,14 @@ Full Patch Note History for PixelDot2D Core Framework.
 ---
 ## Patch 2.2.0
 
+> [!IMPORTANT]
+> **CRITICAL ENGINE REQUIREMENT UPDATE**
+> 
+> The minimum engine version requirement has been upgraded from **Unity 6.3 to Unity 6.5**. This change bridges our framework dependencies with Unity's internal underlying architectural reworks. With Unity 6.5 exposing hidden low-level system compilation rules to prepare the ecosystem for production-verified, near-instant "Fast Enter Play Mode" reloads as the default behavior, this update future-proofes our core caching layers and memory reinterpretation pipelines to guarantee maximum stability and seamless sub-second domain reloading speeds.
+
 ### Core Updates <a name="core-updates-patch-2-2-0"></a>
 
-> **[NOTE]**
+> [!NOTE]
 > All core extension methods' performance updates preserve identical public method signatures. Team members can securely update their local repositories without risking merge conflicts or code breakage, as all optimizations were executed strictly under the hood.
 
 - **Inlining Optimization:** Applied `[MethodImpl(MethodImplOptions.AggressiveInlining)]` to eligible extension methods to minimize call-stack overhead and maximize execution speed.
