@@ -18,6 +18,8 @@ Full Patch Note History for PixelDot2D Core Framework.
     - [Combat Updates](#combat-updates-patch-3-0)
     - [Modular Character Updates](#modular-character-updates-patch-3-0)
     - [Debugging Updates](#debugging-updates-patch-3-0)
+    - [New Sub-library Items](#new-sub-library-items-patch-3-0)
+
 
 - [Patch 2.2.0](#patch-220)
     - [Core Updates](#core-updates-patch-2-2-0)
@@ -104,6 +106,53 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **Decoupled Passive Status Visualization:** Implemented a dedicated inspector view inside `ModularCharacterController` that displays all currently active passives. This array operates as a pure visual snapshot, updated automatically whenever a passive is added or removed. Modifying, resizing, or altering this array within the editor will not affect the character's internal data layer.
 - **Active State Lifecycle Tracking:** Introduced a mirroring visual inspector layer for tracking the active state engine on the `ModularCharacterController`. It utilizes the same safe data-isolation rules as the passive tracker to guarantee runtime integrity.
 - **Editor-Only Engine Stripping:** Wrapped all newly introduced debugging systems completely within `#if UNITY_EDITOR` compiler directives. This ensures that debugging arrays, tracking logic, and visualization methods are entirely stripped from production binaries, leaving an absolute 0% memory and CPU footprint in finished builds.
+
+### New Sub-library Items <a name="new-sub-library-items-patch-3-0"></a>
+
+Built as an optional, high-performance extension package for entities requiring robust item, storage, and equipment lifecycles. 
+
+### Assembly & Dependency Structure
+
+- **Decoupled Architecture:** Built directly on top of the `ModularCharacter` sub-library, ensuring that while it enhances character capabilities, the core character framework remains completely independent.
+- **Optional Integration:** Isolated entirely within its own Assembly Definition (`.asmdef`).
+- **Safe Deletion Safeguards:** True to the framework's strict rule of open extensibility, the entire sub-library folder can be safely deleted from your project structure without breaking or throwing compilation errors in any pre-existing `ModularCharacter` setups.
+
+### Core Sub-System Components
+
+- **ItemLibrary:** Acts as the centralized, optimized database and lookup registry for item asset definitions.
+- **InventoryManager:** A pure, standalone plain C# engine completely decoupled from Unity lifecycles, character containers, or specific UI view logic. It can be universally deployed across players, AI agents, NPCs, world stashes, or loot containers.
+- **CharacterInventory:** A specialized, character-bound wrapper component that orchestrates an `InventoryManager` alongside an `EquipmentManager` to cleanly process gear loadouts, provide inventory access, and apply equipment data modifications to any active `ModularCharacter`.
+
+### Advanced Transaction Engine and UI Safety
+
+- **UI-Safe Mutation Architecture:** Internal slot items never swap raw memory references. Instead, slots swap their internal structural data definitions, ensuring external UI elements and view caches remain perfectly valid, tracked, and completely safe from stale data bugs.
+- **Comprehensive Transaction Suite:** Built-in native support for high-utility storage methods out of the box:
+    - *Swap Slots:* Seamless intra-container item repositioning.
+    - *Inter-Inventory Swap:* Smooth, cross-container slot-to-slot transfers (e.g., Player to Bank).
+    - *Take All:* Automated sequential bulk allocation from external stashes or loot drops.
+    - *Quick Stack:* Smart, multi-stack aggregation that consolidates partial piles left-to-right into existing layout groupings without creating visual clutter or fragmented slot footprints.
+- **Duplication Exploit Protection:** Packed with robust internal validation routines, unique guard clauses, and diverse method overloads to ensure every transaction is completely guarded against item duplication exploits, allowing developers to safely drive inventory operations through a unified, high-level API.
+
+### Composition-Based Item Design (Open/Closed Principle)
+
+- **Zero Rigid Logic:** The core item class acts strictly as an empty structural container that performs no hardcoded gameplay calculations, protecting your codebase from architectural bloating.
+- **Frictionless Extension:** To create entirely new item behaviors, developers simply inherit from the base abstract component class. New scripts can be dropped directly into an item asset configuration within the Unity Inspector without ever modifying the core item source files.
+- **Requirement Validation:** Restrictive validation rules can be plugged into any asset configuration to safely verify baseline character attributes or active status traits before allowing an item to be used or equipped.
+- **Infinite Item Variations:** By mixing, matching, and stacking modular data-driven pieces, you can orchestrate limitless item combinations out of the box, including:
+    - *Consumables:* Simple health-restoration or mana-restoration potions.
+    - *Stat Buffs:* Flasks that grant temporary attribute multipliers for a specified duration.
+    - *Character Passives:* Equipment assets that directly alter character properties and status states.
+    - *Ability Unlocks:* Complex artifacts that inject entirely new capabilities into a `ModularCharacter` (such as dashing, wall-climbing, or extra air-jumps).
+
+> [!NOTE]
+> **Combat Cross-Library Integration:** If developers choose to merge the Combat and Modular Character sub-libraries, they can leverage an identical architectural pipeline. The combat system's `WeaponManager` reads a ScriptableObject blueprint (`SO_MultiWeaponizedModule_BluePrint`) and dynamically alters the internal weapon structure to match. Because of this shared design pattern, items can completely transform weapon behaviors on the fly, just as they inject character abilities like hovering, dashing, or wall-climbing.
+
+### Pre-Wired Data Persistence (Serialization)
+
+- **Seamless Pass-Through Design:** Every inventory container features built-in serialization handling pre-wired to the native `PixelDot2D.Core` saving architecture.
+- **Zero Inventory Code Modification:** Developers never need to write custom save file handlers, parse file streams, or modify the underlying inventory engine.
+- **Frictionless Interface Implementation:** To save any inventory, simply add the `ISaveableAndLoadable` interface to your preferred parent GameObject or controller, and execute a quick forward-call to invoke the underlying inventory's save and load pipeline routines internally.
+
 
 ---
 ## Patch 2.2.0
