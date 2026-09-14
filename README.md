@@ -15,7 +15,8 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 - [Patch 3.0](#patch-30)
     - [Core Updates](#core-updates-patch-3-0)
-
+    - [Combat Updates](#combat-updates-patch-3-0)
+    - [Modular Character Updates](#modular-character-updates-patch-3-0)
 
 - [Patch 2.2.0](#patch-220)
     - [Core Updates](#core-updates-patch-2-2-0)
@@ -45,14 +46,57 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 #### ComponentCache<T> Utility:
 
-- **High-Performance Utility:** Introduced a dedicated component caching primitive designed to abstract and optimize traditional component lookups, completely eliminating repetitive and expensive native `TryGetComponent` hot-path overhead.
-- **Dual-Layer Tracking:** Implemented a mutually exclusive lookup architecture using optimized internal collections. Positive queries instantly resolve cached component references, while definitive negative results are explicitly tracked in a high-speed filter to completely eliminate redundant native lookups on invalid entities.
-- **Pre-Warmed Sizing:** Backing collections leverage a constant, pre-allocated internal baseline capacity to completely bypass runtime resizing overhead and eliminate frame-rate garbage collector spikes.
-- **Lifecycle Management Hooks:** Provided explicit memory cleanup methods (`CleanNulls` and `PurgeCache`) to grant game programmers absolute control over tracking states, allowing them to safely sweep stale Unity pseudo-null references or entirely purge caches during scene transitions and domain recycling loops.
+- **High-Performance Utility:** Introduced a dedicated component caching class designed to abstract and optimize traditional component lookups, completely eliminating repetitive and expensive native `TryGetComponent` hot-path overhead.
+    - **Dual-Layer Tracking:** Implemented a mutually exclusive lookup architecture using optimized internal collections. Positive queries instantly resolve cached component references, while definitive negative results are explicitly tracked in a high-speed filter to completely eliminate redundant native lookups on invalid entities.
+    - **Pre-Warmed Sizing:** Backing collections leverage a pre-allocated internal baseline capacity to help bypass runtime resizing overhead and eliminate frame-rate garbage collector spikes.
+    - **Lifecycle Management Hooks:** Provided explicit memory cleanup methods (`CleanNulls` and `PurgeCache`) to grant game programmers absolute control over tracking states, allowing them to safely sweep stale Unity pseudo-null references or entirely purge caches during scene transitions and domain recycling loops.
 
 ### Concrete Implementations & Developer Resources
 
 - **Production-Ready Asset – "RotatingLine" Showcase:** Added a complete `ScriptableObject` combat configuration showcasing the synchronized orbital system in action. Located within the project architecture under `Combat -> Weapons -> RotatingLine`, this asset comes pre-equipped on the primary Player Controller as the final element when cycling through weapon states, serving as an explicit, live production template for custom spatial movement setups.
+
+
+### Combat Updates <a name="combat-updates-patch-3-0"></a>
+- **State_Projectile_Formation Angular Spatial Tracking:** Implemented a new orientation filter toggle (RotateFormation) that dynamically warps layout array vectors based on the projectile's active structural rotation. This architectural change grants designers the flexibility to draw static formation shapes in the editor and cleanly rotate the entire deployment at runtime using virtual transforms or directional aiming offset ScriptableObjects.
+
+
+### Modular Character Updates <a name="modular-character-updates-patch-3-0"></a>
+
+### Modular Character Updates
+
+- **Base_State_ModularExecution Pipeline Extension:** Added two new virtual integration hooks: `ApplyToOther` and `RemoveFromOther`. These methods empower decoupled gate controllers to cleanly pass external target references precisely where execution behaviors should trigger.
+
+#### State_ModularExit_StatChangeOther:
+
+- **New Passive Exit Condition:** Introduced a new modular Exit Condition for passives that tracks stat changes applied to external characters. Developers can pair this with execution states like `State_ModularExecution_ApplyPassiveToOther` or `State_ModularExecution_ChangeStatCurrent`.
+- **Sticky Buffs/Debuffs:** Allows a payload to linger on targets even after the source passive itself is removed.
+- **Instant Threshold Teardown:** When paired with `ChangeStatCurrent`, it ensures the passive immediately unregisters the moment the defined stat threshold is reached.
+
+#### New Custom Spatial Gates & Executions:
+
+- **State_ModularGate_OnCollisionStay:** Introduced a colliderless gate designed to handle spatial trigger interactions (such as enter and exit events). This sub-system completely bypasses the overhead of Unity's physical collision engine. It operates entirely via virtual data processing, routing all spatial lifecycle updates through the core framework `CollisionManager` event pipeline.
+- **State_ModularExecution_ApplyPassiveToOther:** Introduced a dedicated aura-delivery execution that safely transmits secondary passives onto external targets. This enables complex spatial interactions, such as applying localized moving debuffs (slows, damage reductions) or propagating modular entity buffs (movement speed, offensive amplifiers) to characters supplied by `State_ModularGate_OnCollisionStay`.
+
+#### State_ModularExecution_ChangeStatCurrent:
+
+- **Overhauled Calculation Pipeline:** Consolidated and overhauled the core internal math pipeline to handle both self-targeted adjustments and continuous external aura/area-of-effect execution types (via `State_ModularGate_OnCollisionStay`). It natively supports pure flat values, pure scaling modifiers, or hybrid calculations.
+- **Dynamic Synergistic Curves:** By utilizing the new dual-mode evaluation layer (`Enum_ModularPassiveStatChangeType.Current_Value`), designers can create dynamic, emergent gameplay loops through the synergistic relationship between flat and scaling properties. At low resource values, the flat amount "carries" the math (acting as a foundational baseline); as the stat fills, the current-scaling component takes over and "carries" the flat value into an exponential curve. For example, a hybrid passive granting 5 Flat + 50% Current Mana per second will rely entirely on the 5 flat ticks at 0 mana to initiate recovery, before aggressively accelerating as current values climb. For perfectly uniform, un-shifted math metrics, `Max_Value` remains available to guarantee absolute mathematical consistency.
+- **Environmental Fallback Layer:** Introduced a defensive safety check; if an external applier reference evaluates to null, the math automatically defaults to the host entity's parameters (`m_Controller`) to ensure zero-exception execution.
+
+#### Identity-Aware Broker Handshaking:
+
+- **ModifyCurrentStat Overload:** Introduced an identity-aware method overload that accepts an external `IModularCharacter` source modifier context. If the mutation is external (not self-inflicted) and the post-mitigation `_finalizedModifiedStatValue` is non-zero, the system safe-dispatches a private handshake loop to the passive controller (`OnModifyCurrentStatOfOther`). This enables decoupled, cross-character interaction tracking. For example, pairing a siphon aura (`State_ModularGate_OnCollisionStay` + `State_ModularExecution_ChangeStatCurrent`) with this handshake allows a character to dynamically trigger secondary passive rewards—like a speed boost or resource return—whenever they successfully drain a target's mana.
+- **State_ModularGate_OnOtherStatChange:** Intercepts the returning cross-character broker callback to evaluate out-of-the-box passive triggers based on targeted external actions. Features a robust filtering matrix supporting change-direction validation (`Positive_Only`, `Negative_Only`, or `All`), element school flag matching, metric threshold accumulation, and internal execution cooldowns. Out-of-the-box integrations include `State_ModularExecution_ChangeStatCurrent`, `State_ModularExecution_PassiveImmunity`, and `State_ModularExecution_GrantStatImmunity`, though the pipeline remains infinitely open for custom developer extensions.
+
+#### New Lifecycle Exit Conditions:
+
+- **State_ModularExit_OnStatMaxValue:** Introduced a reactive lifecycle exit condition that evaluates changes to an entity's maximum stat capacities. This enables developers to create dynamic pacing gates for high-tier utility buffs or continuous resource transformations. For example, a designer can deploy an overcharged spellcaster buff ("Gain 500% Mana Regeneration") that authoritatively terminates its own lifecycle the moment an entity's maximum stamina ceiling is driven above a specific mechanical boundary.
+- **State_ModularExit_PercentageOfStat:** Introduced a new percentage threshold evaluator that monitors current resource ratios relative to maximum stat pools. This node unlocks advanced, tactical playstyles and cumulative decay profiles. For example, a designer can easily stitch together a devastating debuff combo like a modified Curse of Exhaustion—which constantly mirrors incoming health damage as a movement speed reduction—and configure it to cleanly purge itself and release the player the exact moment their current movement speed drops to or below 50% of its maximum value.
+
+### Concrete Implementations & Developer Resources
+
+- **Stat Manipulation Integration:** Implemented native support for `ApplyToOther` and `RemoveFromOther` directly inside `State_ModularExecution_StatManipulation` to demonstrate standardized state propagation patterns.
+- **New Production-Ready Asset – "FrostAura":** Added a complete `ScriptableObject` configuration showcasing a 90% movement speed reduction effect on affected `IModularCharacter` targets. This asset is pre-configured and included inside the project layout to serve as an explicit production template for developer projects.
 
 
 
