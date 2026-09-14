@@ -13,6 +13,10 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 ## Table Of Contents
 
+- [Patch 3.0](#patch-30)
+    - [Core Updates](#core-updates-patch-3-0)
+
+
 - [Patch 2.2.0](#patch-220)
     - [Core Updates](#core-updates-patch-2-2-0)
     - [Combat Updates](#combat-updates-patch-2-2-0)
@@ -30,6 +34,27 @@ Full Patch Note History for PixelDot2D Core Framework.
   - [Combat Updates](#combat-updates-patch-2-0)
   - [Platformer Updates](#platformer-updates-patch-2-0)
   - [Modular Character Sub-Library](#modular-character-sub-library-patch-2-0)
+
+
+---
+## Patch 3.0
+
+### Core Updates <a name="core-updates-patch-3-0"></a>
+
+- **Base_State_RB2DMovement Synchronized Orbital Integration:** Introduced a new, highly flexible rotational movement behavior (`State_RB2DMovement_RotateAroundOrigin`) configured to execute rigid multi-radius circular paths around a dynamic, centralized origin point. By utilizing uniform angular velocities across varying physical distances, this state empowers developers to effortlessly orchestrate complex orbiting arrays (such as the classic "Mario Fire Line" behavioral profile) that maintain perfect positional alignment over time.
+
+#### ComponentCache<T> Utility:
+
+- **High-Performance Utility:** Introduced a dedicated component caching primitive designed to abstract and optimize traditional component lookups, completely eliminating repetitive and expensive native `TryGetComponent` hot-path overhead.
+- **Dual-Layer Tracking:** Implemented a mutually exclusive lookup architecture using optimized internal collections. Positive queries instantly resolve cached component references, while definitive negative results are explicitly tracked in a high-speed filter to completely eliminate redundant native lookups on invalid entities.
+- **Pre-Warmed Sizing:** Backing collections leverage a constant, pre-allocated internal baseline capacity to completely bypass runtime resizing overhead and eliminate frame-rate garbage collector spikes.
+- **Lifecycle Management Hooks:** Provided explicit memory cleanup methods (`CleanNulls` and `PurgeCache`) to grant game programmers absolute control over tracking states, allowing them to safely sweep stale Unity pseudo-null references or entirely purge caches during scene transitions and domain recycling loops.
+
+### Concrete Implementations & Developer Resources
+
+- **Production-Ready Asset – "RotatingLine" Showcase:** Added a complete `ScriptableObject` combat configuration showcasing the synchronized orbital system in action. Located within the project architecture under `Combat -> Weapons -> RotatingLine`, this asset comes pre-equipped on the primary Player Controller as the final element when cycling through weapon states, serving as an explicit, live production template for custom spatial movement setups.
+
+
 
 ---
 ## Patch 2.2.0
