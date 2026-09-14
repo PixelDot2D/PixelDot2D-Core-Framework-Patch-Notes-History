@@ -153,6 +153,14 @@ Built as an optional, high-performance extension package for entities requiring 
 - **Zero Inventory Code Modification:** Developers never need to write custom save file handlers, parse file streams, or modify the underlying inventory engine.
 - **Frictionless Interface Implementation:** To save any inventory, simply add the `ISaveableAndLoadable` interface to your preferred parent GameObject or controller, and execute a quick forward-call to invoke the underlying inventory's save and load pipeline routines internally.
 
+### Layered Loot Tables Sub-System
+
+- **Quad-Stage Loot Table Engine:** Included within the items extension is a specialized quad-stage loot table engine that allows developers to completely bypass flat, linear probability drop lists and weights by introducing deep, multi-tiered roll isolation. Designers can establish an explicit gatekeeper entry chance on a single index row, then pack its internal array with heavy filler drops surrounding exactly one ultra-rare jackpot item to create intense game-loot tension.
+- **Structural Priority-Based Trapping:** The execution pipeline evaluates data configurations sequentially from Index 0 upward. Because the runtime automatically executes a hard, deterministic short-circuit the moment the running item count hits the maximum allowed threshold, array positioning natively dictates statistical priority. This allows designers to balance drop priority purely through the visual order of the inspector list, without requiring complex script overrides or heavy external logic blocks. 
+- **State-Blind Reusable Processors:** The core calculation manager is completely state-blind and decoupled from specific character controllers. It can be composed natively into any game entity—including enemies, procedural containers, breakable objects, merchants, and world chests—allowing a single database configuration asset to be safely shared and re-used across an endless amount of active entities.
+- **Low API Friction:** Introducing loot drops into any entity takes only a few lines of code, and transferring a rolled payload into a target inventory requires a single line of code. The processor drops results natively into a pre-allocated container, allowing the main framework to instantly absorb, validate, and clear the data packet with a zero runtime garbage memory footprint, seamlessly handling drops from dead enemies, randomly spawned chests, and world stashes out of the box.
+
+
 
 ---
 ## Patch 2.2.0
