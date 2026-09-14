@@ -62,7 +62,6 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 ### Modular Character Updates <a name="modular-character-updates-patch-3-0"></a>
 
-### Modular Character Updates
 
 - **Base_State_ModularExecution Pipeline Extension:** Added two new virtual integration hooks: `ApplyToOther` and `RemoveFromOther`. These methods empower decoupled gate controllers to cleanly pass external target references precisely where execution behaviors should trigger.
 
