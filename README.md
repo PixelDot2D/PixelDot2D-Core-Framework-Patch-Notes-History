@@ -17,6 +17,7 @@ Full Patch Note History for PixelDot2D Core Framework.
     - [Core Updates](#core-updates-patch-3-0)
     - [Combat Updates](#combat-updates-patch-3-0)
     - [Modular Character Updates](#modular-character-updates-patch-3-0)
+    - [Debugging Updates](#debugging-updates-patch-3-0)
 
 - [Patch 2.2.0](#patch-220)
     - [Core Updates](#core-updates-patch-2-2-0)
@@ -73,7 +74,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 #### New Custom Spatial Gates & Executions:
 
-- **State_ModularGate_OnCollisionStay:** Introduced a colliderless gate designed to handle spatial trigger interactions (such as enter and exit events). This sub-system completely bypasses the overhead of Unity's physical collision engine. It operates entirely via virtual data processing, routing all spatial lifecycle updates through the core framework `CollisionManager` event pipeline.
+- **State_ModularGate_OnCollisionStay:** Introduced a colliderless gate designed to handle spatial trigger interactions. This sub-system completely bypasses the overhead of Unity's physical collision engine. It operates entirely via virtual data processing, routing all spatial lifecycle updates through the core framework `CollisionManager` event pipeline.
 - **State_ModularExecution_ApplyPassiveToOther:** Introduced a dedicated aura-delivery execution that safely transmits secondary passives onto external targets. This enables complex spatial interactions, such as applying localized moving debuffs (slows, damage reductions) or propagating modular entity buffs (movement speed, offensive amplifiers) to characters supplied by `State_ModularGate_OnCollisionStay`.
 
 #### State_ModularExecution_ChangeStatCurrent:
@@ -98,6 +99,11 @@ Full Patch Note History for PixelDot2D Core Framework.
 - **New Production-Ready Asset – "FrostAura":** Added a complete `ScriptableObject` configuration showcasing a 90% movement speed reduction effect on affected `IModularCharacter` targets. This asset is pre-configured and included inside the project layout to serve as an explicit production template for developer projects.
 
 
+### Debugging Updates <a name="debugging-updates-patch-3-0"></a>
+
+- **Decoupled Passive Status Visualization:** Implemented a dedicated inspector view inside `ModularCharacterController` that displays all currently active passives. This array operates as a pure visual snapshot, updated automatically whenever a passive is added or removed. Modifying, resizing, or altering this array within the editor will not affect the character's internal data layer.
+- **Active State Lifecycle Tracking:** Introduced a mirroring visual inspector layer for tracking the active state engine on the `ModularCharacterController`. It utilizes the same safe data-isolation rules as the passive tracker to guarantee runtime integrity.
+- **Editor-Only Engine Stripping:** Wrapped all newly introduced debugging systems completely within `#if UNITY_EDITOR` compiler directives. This ensures that debugging arrays, tracking logic, and visualization methods are entirely stripped from production binaries, leaving an absolute 0% memory and CPU footprint in finished builds.
 
 ---
 ## Patch 2.2.0
