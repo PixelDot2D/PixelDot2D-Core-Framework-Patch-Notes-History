@@ -327,4 +327,5 @@ To ensure absolute stability during complex, multi-state reconfigurations, all t
 - **Infinite Reusability:** One universal controller to drive players, enemies, AI companions, or any 2D entity.
 
 ---
-*Copyright 2026 © PixelDot2D - All Rights Reserved | Contact: PixelDot2D@gmail.com*
+*Copyright 2026 - Present © PixelDot2D - All Rights Reserved | Contact: PixelDot2D@gmail.com*
+
