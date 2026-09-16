@@ -12,7 +12,7 @@ Full Patch Note History for PixelDot2D Core Framework.
 
 > [!NOTE]
 > - **Target Runtime & Performance Roadmap — The Journey to Unity 7.0 & C# 14:** 
-> - Our development lifecycle is defined by a commitment to tracking cutting-edge engine iterations. We actively upgrade our framework dependencies alongside Unity’s latest releases (such as our recent migration to Unity 6.5) to future-proof our core systems. This aggressive update cadence serves as a calculated stepping stone toward a stable Unity 7.0 runtime. 
+> - Our development lifecycle is defined by a commitment to tracking cutting-edge engine iterations. We actively upgrade our framework alongside Unity’s latest major releases (such as our recent migration to Unity 6.5) to future-proof our core systems. This aggressive update cadence serves as a calculated stepping stone toward a stable Unity 7.0 runtime. 
 > - Settling on Unity 7.0 as our long-term baseline allows us to natively leverage advanced modern C# capabilities with zero developer overhead. For example, utilizing C# 14's `params ReadOnlySpan` support swaps standard heap-allocated `params T[]` arrays for stack-allocated spans behind the scenes. Developers retain the familiar, clean params invocation syntax while completely eliminating hidden garbage collection (GC) allocations on hot paths. By constantly adapting now, we guarantee a seamless, production-ready transition into the massive performance benefits of Unity 7.0.
 
 
