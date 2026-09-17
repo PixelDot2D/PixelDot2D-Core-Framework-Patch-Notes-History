@@ -227,7 +227,7 @@ Use code with caution.
 - **Axis Locking:** Setting any specific axis speed to `0.0f` within either the configuration asset or the incoming multiplier vector completely isolates, locks, or ignores movement on that plane via direct zero-multiplication.
 
 #### Low-Overhead Native Collision Matrix:
-- **Custom Collision System:** Added a high-performance collision matrix to completely bypass Unity's native Box2D performance cost and lifecycle inconsistencies.
+- **Custom Collision System:** Added a high-performance collision matrix to completely bypass Unity's performance cost when many objects overlap and lifecycle inconsistencies.
 - **Traditional Trigger Lifecycles:** Maintains full `OnTriggerEnter`, `OnTriggerStay`, and `OnTriggerExit` lifecycle simulations, driven entirely by manual, predictable update pumps inside your fixed layout loop.
 - **Batched Data Payloads:** Combines all frame intersections into a single event call, separating results into dedicated collections for valid targets and obstacles simultaneously.
 - **Total Execution Control:** Grants developers absolute control over sorting priority, allowing you to check obstacle lines first for early deactivation or focus on valid target logic instantly.
